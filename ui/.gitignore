@@ -2,5 +2,6 @@
 node_modules/
 dist/
 .DS_Store
-n8n_data
+n8n_data/
+
 
