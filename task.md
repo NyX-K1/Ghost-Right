@@ -1,0 +1,15 @@
+- [x] Priority 1: Formatting Fix (Sanitizer)
+    - [x] Create `src/utils/sanitizeOutput.js`
+    - [x] Implement sanitization in the output display component
+    - [x] Ensure `whitespace-pre-wrap` class is used
+    - [ ] Fix Raw JSON Rendering issue
+        - [ ] Update `App.jsx` to extract text from response
+        - [ ] Update `sanitizeOutput.js` for escaped quotes
+        - [ ] Update `ChromiumDisplay.jsx` to render content correctly
+- [x] Priority 2: LinkedIn Aesthetic (Palette & Shader)
+    - [x] Update `tailwind.config.js` with new palette
+    - [x] Create animated shader background
+- [x] Priority 3: GhostRight Branding Assets
+    - [x] Create `GhostSymbol.jsx`
+    - [x] Create `GhostWordmark.jsx`
+    - [x] Update `Header.jsx`

@@ -1,0 +1,791 @@
+{
+  "name": "The Ears + The Brain",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        288,
+        496
+      ],
+      "id": "34d0a944-8b63-4317-8fd2-22040cfcf591",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "hM4iT6A9Two3dh5z",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        880,
+        112
+      ],
+      "id": "1da48fca-8ce8-483d-a4ca-23c89df3e808",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1088,
+        336
+      ],
+      "id": "d0f4dd56-0a7b-44df-878f-860315f38506",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "hM4iT6A9Two3dh5z",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        352
+      ],
+      "id": "3520f57b-76f5-4dd9-8a84-bea0cafa87bf",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "hM4iT6A9Two3dh5z",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.supadata.ai/v1/youtube/transcript?url={{ $node[\"Webhook\"].json.body.yt_url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "sd_140cac211481a855432aa454242e4455"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        96,
+        96
+      ],
+      "id": "2e3d22a8-4910-49f8-80cc-e9b9ba5ef106",
+      "name": "Transcription Request(Supadata)"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nfunction findAllText(obj, results = []) {\n  if (Array.isArray(obj)) {\n    for (const item of obj) findAllText(item, results);\n  } else if (typeof obj === 'object' && obj !== null) {\n    for (const key in obj) {\n      if (key === 'text' && typeof obj[key] === 'string') {\n        results.push(obj[key]);\n      } else {\n        findAllText(obj[key], results);\n      }\n    }\n  }\n  return results;\n}\nconst allTextFound = findAllText(items);\nconst full_transcript = allTextFound.join(' ');\nreturn {\n  full_transcript,\n  wordCount: full_transcript.split(' ').length,\n  segmentsFound: allTextFound.length\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        96
+      ],
+      "id": "15998df4-f25a-45a5-a4c2-5e9cae67b994",
+      "name": "Convert to simple text"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "style_examples",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are an expert in computational stylistics and narrative voice. You analyze how people write, not what they believe. You will be given WRITING SAMPLES containing multiple LinkedIn posts or content pieces from a single author. Your task is to produce a concise but detailed \"Style Guide\" that describes how this person writes so that another writer could approximate their voice. CRITICAL RULES - Focus on STYLE, not on judging or arguing with their ideas. - Base everything only on the provided SAMPLES. Do not invent traits you cannot justify. - When you mention a pattern, briefly point to 1–2 short example phrases from the text as evidence. - Do NOT write any new content \"in their voice.\" Only describe their style. OUTPUT FORMAT Use the following sections and headings exactly: 1. VOICE OVERVIEW - 2–4 sentences summarizing their overall writing voice (e.g., “casual but precise,” “ranty and emotional,” “measured and academic”). 2. TONE & EMOTIONAL RANGE - Typical tone (e.g., blunt, warm, sarcastic, detached). - How often they express strong emotion (anger, enthusiasm, vulnerability). - Whether they use humor, irony, or sarcasm. Provide a few short quote fragments as evidence. 3. FORMALITY & PERSONA - Level of formality (slang vs. proper grammar; swearing or not). - How they present themselves (expert, friend, mentor, skeptic, etc.). - How often they use first person (“I,” “me”), second person (“you”), or collective (“we”). 4. SENTENCE & PARAGRAPH STRUCTURE - Typical sentence length and variation (very short / mixed / very long). - Common structures (lists, run-on sentences, questions, fragments). - How they break paragraphs (big blocks vs. short chunks, line breaks, etc.). 5. SYNTAX & GRAMMATICAL HABITS - Notable quirks: fragments, comma splices, repeated patterns (“and then,” “so basically,” etc.). - Use of questions, exclamations, parentheticals, dashes, ellipses, etc. - Any consistent patterns in tense (present vs. past) or modality (must, should, might). 6. VOCABULARY & PHRASES - Complexity level (simple everyday words vs. technical/academic). - Jargon or domain-specific terms they rely on. - Signature words, phrases, or fillers they use repeatedly (e.g., “tbh,” “low-key,” “to be fair,” “in other words”). - 5–10 key recurring words/phrases with micro-examples. 7. DISCOURSE & RHETORICAL HABITS - How they usually open and close posts (hooks, questions, direct statements, etc.). - How they structure arguments or explanations (step-by-step, story-driven, jumping around). - Use of analogies, stories, rhetorical questions, lists, or bullet-style enumeration. - Whether they reference personal experience, data, or hypothetical scenarios more. 8. FORMATTING & VISUAL STYLE - Use of line breaks, spacing, headings, bullet points, numbered lists. - Use of emojis, ALL CAPS, bold-like emphasis (e.g., *like this*), or repeated punctuation (!!!, ???). - Any consistent platform-specific habits (hashtags, @mentions). 9. THEMES & VALUES (STYLE-RELEVANT ONLY) - Very briefly: recurring themes or topics *only insofar as they influence style* (e.g., “frequently gives advice in a ‘coach’ voice,” “often critiques others in a sarcastic way”). 10. DOs AND DON’Ts FOR EMULATING THIS STYLE - 5–10 bullet-point “DOs” that someone should follow to sound similar. - 3–5 bullet-point “DON’Ts” that would break the illusion. 11. UNCERTAINTIES & VARIATION - Note if their style shifts between posts (e.g., sometimes formal, sometimes very casual). --- WRITING SAMPLES TO ANALYZE: {{ $node[\"Webhook\"].json.body.raw_samples }}"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.8,
+      "position": [
+        288,
+        304
+      ],
+      "id": "96aa38d9-6d91-407b-8677-01cbf260f456",
+      "name": "Style-Analyser-AI"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "Please generate the 5 hooks now based on the Transcript and Style Guide provided in the System Message.",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are a LinkedIn ghostwriter highly skilled at imitating individual writing styles. You will receive: \n1. A STYLE GUIDE (how the author naturally writes). \n2. A TRANSCRIPT (what the post should be about). \n\nYOUR GOAL \nWrite 5 distinct opening hooks (first line only) for a LinkedIn post about the TRANSCRIPT, each one written as if the original author from the STYLE GUIDE wrote it. \n\nHOOK TYPES TO GENERATE \n1. Direct Statement Hook – state the core lesson or point immediately. \n2. Story Hook – drop the reader into the middle of a concrete moment or scene. \n3. Contrarian Hook – challenge a common assumption or cliché related to the transcript. \n4. Question Hook – ask the reader a direct, thought-provoking question. \n5. Value Hook – clearly tell the reader what they’ll get from the post. \n\nSTYLE & AUTHENTICITY RULES \n- The STYLE GUIDE tells you **how** things are said. \n- The TRANSCRIPT tells you **what** the hooks are about. \n- Match the author’s tone, rhythm, sentence length, favorite phrases, and quirks. \n- Use their usual level of formality, slang, emojis, and line breaks exactly as described. \n- If the STYLE GUIDE includes DOs and DON’Ts, follow all DOs and avoid all DON’Ts. \n- Hooks should feel like something this specific person would casually type, not like generic LinkedIn copy. \n- Do NOT copy sentences from the TRANSCRIPT; write new lines inspired by its key ideas. \n- Aim to keep each hook under ~15 words, **unless** the STYLE GUIDE suggests naturally longer openers. \n- Only use line breaks or emojis inside hooks if the STYLE GUIDE indicates they do that in first lines. \n- Avoid typical “template” phrases (e.g., “In today’s world,” “Let that sink in”) unless the STYLE GUIDE shows they actually use them. \n- Each hook must be clearly different in wording and angle (no small rephrases of the same idea). \n\nOUTPUT FORMAT \nNumber and label each hook exactly like this: \n1. Direct Statement Hook: [text] \n2. Story Hook: [text] \n3. Contrarian Hook: [text] \n4. Question Hook: [text] \n5. Value Hook: [text] \n\nDo not add explanations or any extra text. \n\n--- \n\nSTYLE GUIDE: {{ $node[\"Merge\"].json.Style_Guide }}\n\nTRANSCRIPT: {{ $node[\"Merge\"].json.full_transcript }}"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.8,
+      "position": [
+        1088,
+        160
+      ],
+      "id": "410045be-b9e9-47b9-b8af-45cf2b22cb3b",
+      "name": "Hook-Generator-AI"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "Using the strongest hook from the provided options and following the Style Guide strictly, write the full LinkedIn post based on the key lessons in the Transcript.",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are a master LinkedIn Ghostwriter who specializes in imitating a specific author’s voice. You have been provided with: \n\n1. A STYLE GUIDE → how this author naturally writes (tone, structure, quirks, formatting). \n2. A TRANSCRIPT → the core story, ideas, and language to base the post on. \n3. A LIST OF 5 HOOKS → possible opening lines for the post. \n\nYOUR GOAL \nWrite one complete, high-impact LinkedIn post that: \n- Sounds like it was written by the author described in the STYLE GUIDE. \n- Is grounded in the ideas and story from the TRANSCRIPT. \n- Opens with the single best hook from the list of 5. \n\n-------------------------------- \nPRIORITY RULES (READ CAREFULLY) \n-------------------------------- \n1. THE STYLE GUIDE is the source of truth for HOW the post should sound and look. \n- If any instruction below conflicts with the STYLE GUIDE, follow the STYLE GUIDE. \n\n2. THE TRANSCRIPT is the source of truth for WHAT the post is about. \n- Capture the main story and 1–2 key takeaways. \n- You do NOT need to include every detail from the transcript—focus on a clear through-line. \n\n3. THE HOOK LIST is only for the first line. \n- You must select the single best hook from the 5 provided (see instructions below). \n\n------------------- \nCONSTRUCTION RULES \n------------------- \n1. THE HOOK \n- Read all 5 hooks carefully. \n- Choose the one that: \n  - Best matches the author’s style from the STYLE GUIDE, and \n  - Best fits the core message and emotional tone of the TRANSCRIPT. \n- You may make very small edits to the chosen hook (1–3 word tweaks) to better match the STYLE GUIDE, but keep the meaning and structure intact. \n- Use the chosen (and lightly adjusted, if needed) hook as the **first line of the post**. \n\n2. THE VOICE & PARAGRAPHS \n- Follow the STYLE GUIDE strictly for: \n  - Tone, sentence length, rhythm, vocabulary, and quirks. \n  - Formatting: emojis, caps, emphasis, line breaks, bullets, etc. \n- By default (IF the STYLE GUIDE doesn’t say otherwise): \n  - Use short paragraphs: 1–3 sentences each. \n  - Aim for 4–10 paragraphs total. \n  - Write in a direct, “mentor” tone that speaks to the reader. \n  - Use frequent line breaks so the post is easy to skim on LinkedIn. \n\n3. THE NARRATIVE (STORY + LESSON) \n- Use the narrative perspective established in the TRANSCRIPT. \n- Include **concrete details** from the TRANSCRIPT (actions, specific moments, numbers, short quotes) to avoid generic storytelling. \n- Move from: \n  - A real, specific moment or problem → to the turning point or insight → to the lesson framed for the reader (“you”). \n\n4. NATURAL, NON-GENERIC WRITING \n- Avoid: “Firstly,” “Secondly,” “In conclusion,” “To sum up.” \n- Avoid words like: “tapestry,” “delve,” “unlock,” “ever-evolving landscape,” “synergies,” “paradigm shift.” \n- Prefer: Concrete verbs, plain direct wording, and honest lines. \n\n5. LENGH & SHAPE \n- Roughly 150–300 words unless specified otherwise. \n- Arc: Hook → Context → Tension → Insight → Practical Takeaway → CTA. \n\n6. CALL TO ACTION (CTA) \n- End with **one** simple CTA (question or nudge) that matches the author's engagement style. \n\n----------------- \nOUTPUT REQUIREMENTS \n----------------- \n- Output **only** the final LinkedIn post text. \n- No explanations, labels, or section titles. \n- The first line must be the chosen hook. \n\n----------------- \n\nSTYLE GUIDE: {{ $node[\"Merge\"].json.Style_Guide }}\n\nTRANSCRIPT: {{ $node[\"Merge\"]?.json?.full_transcript }} \n\nHOOK OPTIONS (5): {{ $node[\"Hook-Generator-AI\"]?.json?.text }}"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.8,
+      "position": [
+        1440,
+        160
+      ],
+      "id": "d384fb4b-7e0a-4b1d-9975-8f908a75b858",
+      "name": "Writer-AI"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b51b6b38-7ea2-49a1-afb2-04eb78bd6654",
+              "name": "text",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2144,
+        160
+      ],
+      "id": "feef8920-1823-43c6-a5ce-1b803f9172d5",
+      "name": "Final-Post-Material"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "6ce6268b-19bb-43f7-8be8-d1188cc5b39d",
+              "leftValue": "={{ $node[\"Get-Row(SearchEmail)\"].json?.Email || \"\" }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        304,
+        -144
+      ],
+      "id": "2ea33c24-efa3-4bb5-b92d-97e7afb01c17",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        624,
+        -160
+      ],
+      "id": "f417c1a6-2c96-4013-ad46-8dc5268b9ae3",
+      "name": "Style_Carrier"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ghostwriter-input",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -288,
+        -144
+      ],
+      "id": "41b5b20b-29a8-483e-a0bc-bf5c5fb95412",
+      "name": "Webhook",
+      "webhookId": "7d52750f-1b6a-42a4-a0ad-3558ed6c4379"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1792,
+        368
+      ],
+      "id": "9d95dfe4-dc7d-4717-a9e1-1a2dea6fa82b",
+      "name": "Google Gemini Chat Model3",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "hM4iT6A9Two3dh5z",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "You are a World-Class LinkedIn Editor and Brand Strategist. Your sole purpose is to take a \"Rough Draft\" of a post and apply a specific \"Author Signature\" to it.\n\nYou focus on:\n1. Visual Scannability (White space and line breaks).\n2. Emotional Texture (Emojis and tone).\n3. Signature Vocabulary (Specific slang and recurring phrases).\n4. Formatting (Bullet styles and capitalization).\n\nSTRICT LIMITATION: You must NOT change the facts, the story, or the data provided in the Rough Draft. You are only changing the \"Packaging.\"\nOutput ONLY the raw text. Do NOT use markdown code blocks or backticks.",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are a high-end LinkedIn Editor. Your job is to take a \"Rough Draft\" and apply a very specific \"Signature Visual Style\" without changing the core story.  INPUTS: 1. ROUGH DRAFT: {{ $node[\"Writer-AI\"].json.text }} 2. STYLE GUIDE: {{ $node[\"Merge\"].json.Style_Guide }}  YOUR EDITING CHECKLIST: 1. SIGNATURE FORMATTING: Use the specific emojis mentioned in the Style Guide (e.g., 🌱, ❤️, 🚀, 🔹) exactly where the author would. 2. LINE BREAKS: Ensure the post is \"breathable.\" If the Style Guide says \"frequent line breaks,\" break any paragraph longer than 2 sentences. 3. SIGNATURE PHRASES: Inject 1-2 signature phrases if they fit naturally (e.g., \"cracked,\" \"Alpha batch,\" \"proud\"). 4. BULLET STYLE: If the author uses 🔹 instead of 1., 2., 3., swap them now. 5. THE \"VIBE\" CHECK: Ensure the post doesn't sound like AI. Remove any \"fluff\" or \"corporate-speak\" that the Style Guide's \"DON'Ts\" section forbids.  STRICT RULE: Do not add new information. Only refine the visual style and vocabulary of the ROUGH DRAFT to match the STYLE GUIDE.  OUTPUT: Output ONLY the final, polished post. Output ONLY the raw text. Do NOT use markdown code blocks or backticks."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.8,
+      "position": [
+        1792,
+        160
+      ],
+      "id": "20afb9da-c05f-4da5-aea2-7ade79bf923e",
+      "name": "Refiner-AI"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "1uN2SE7olVQzim_0cWwnBORRNPJQwD-3w29_QPP-Kgl0",
+          "mode": "list",
+          "cachedResultName": "AI_Brain_Vault",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uN2SE7olVQzim_0cWwnBORRNPJQwD-3w29_QPP-Kgl0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2003179462,
+          "mode": "list",
+          "cachedResultName": "sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uN2SE7olVQzim_0cWwnBORRNPJQwD-3w29_QPP-Kgl0/edit#gid=2003179462"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Email",
+              "lookupValue": "={{ $node[\"Webhook\"].json.body.email }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        96,
+        -144
+      ],
+      "id": "5a482546-5e15-4074-9f39-15cbc76f6bb9",
+      "name": "Get-Row(SearchEmail)",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleApi": {
+          "id": "lUBwBlOaD6WFHrtl",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1uN2SE7olVQzim_0cWwnBORRNPJQwD-3w29_QPP-Kgl0",
+          "mode": "list",
+          "cachedResultName": "AI_Brain_Vault",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uN2SE7olVQzim_0cWwnBORRNPJQwD-3w29_QPP-Kgl0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2003179462,
+          "mode": "list",
+          "cachedResultName": "sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uN2SE7olVQzim_0cWwnBORRNPJQwD-3w29_QPP-Kgl0/edit#gid=2003179462"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $node[\"Webhook\"].json.body.email }}",
+            "Name": "={{ $node[\"Webhook\"].json.body.name }}",
+            "Style_Guide": "={{ $node[\"Style-Analyser-AI\"].json.text }}",
+            "Raw_Samples": "={{ $node[\"Webhook\"].json.body.raw_samples }}",
+            "Date_Of_Creation": "={{ $now }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Raw_Samples",
+              "displayName": "Raw_Samples",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Style_Guide",
+              "displayName": "Style_Guide",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Date_Of_Creation",
+              "displayName": "Date_Of_Creation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        640,
+        304
+      ],
+      "id": "d323154d-2001-4383-af11-f0f4a981cc74",
+      "name": "Append-Row(NewUser)",
+      "credentials": {
+        "googleApi": {
+          "id": "lUBwBlOaD6WFHrtl",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1uN2SE7olVQzim_0cWwnBORRNPJQwD-3w29_QPP-Kgl0",
+          "mode": "list",
+          "cachedResultName": "AI_Brain_Vault",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uN2SE7olVQzim_0cWwnBORRNPJQwD-3w29_QPP-Kgl0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 621051853,
+          "mode": "list",
+          "cachedResultName": "archive",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uN2SE7olVQzim_0cWwnBORRNPJQwD-3w29_QPP-Kgl0/edit#gid=621051853"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Post_ID": "={{ $now.toFormat('yyyyMMddHHmmss') }}",
+            "Email": "={{ $node[\"Webhook\"].json.body.email }}",
+            "YT_Link": "={{ $node[\"Webhook\"].json[\"body\"][\"yt_url\"] }}",
+            "Generated_Content": "={{ $node[\"Refiner-AI\"].json.text }}",
+            "Created_At": "={{ $now.toLocaleString() }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Post_ID",
+              "displayName": "Post_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "YT_Link",
+              "displayName": "YT_Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Generated_Content",
+              "displayName": "Generated_Content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Created_At",
+              "displayName": "Created_At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2352,
+        160
+      ],
+      "id": "e3725e1d-68ec-4e51-b0c2-811ef19af493",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleApi": {
+          "id": "lUBwBlOaD6WFHrtl",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{\n{\n  \"status\": \"success\",\n  \"post_id\": $now.toFormat('yyyyMMddHHmmss'),\n  \"postContent\": $node[\"Refiner-AI\"].json.text,\n  \"metadata\": {\n    \"source_url\": $node[\"Webhook\"].json.body.url,\n    \"timestamp\": $now.toLocaleString()\n  }\n}\n}}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2560,
+        160
+      ],
+      "id": "d27b7e56-a03e-4632-821f-6ee26cc96365",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Transcription Request(Supadata)": {
+      "main": [
+        [
+          {
+            "node": "Convert to simple text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to simple text": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Style-Analyser-AI": {
+      "main": [
+        [
+          {
+            "node": "Append-Row(NewUser)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Hook-Generator-AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hook-Generator-AI": {
+      "main": [
+        [
+          {
+            "node": "Writer-AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Writer-AI": {
+      "main": [
+        [
+          {
+            "node": "Refiner-AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Style-Analyser-AI",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Hook-Generator-AI",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Writer-AI",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Style_Carrier",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Style-Analyser-AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Style_Carrier": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get-Row(SearchEmail)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Transcription Request(Supadata)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Refiner-AI",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Refiner-AI": {
+      "main": [
+        [
+          {
+            "node": "Final-Post-Material",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Final-Post-Material": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get-Row(SearchEmail)": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append-Row(NewUser)": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "6cb726ec-bc82-49f1-8dd8-37495a540ca6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e9e6bb4306524d6ff8592717aefe8190dd63b1c808944db0a600f922ea24764b"
+  },
+  "id": "GHE8FvNjMwT79BGa",
+  "tags": []
+}

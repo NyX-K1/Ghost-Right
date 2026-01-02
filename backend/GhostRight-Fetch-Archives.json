@@ -1,0 +1,160 @@
+{
+  "name": "GhostRight-Fetch-Archives",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "archives",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "1bceef58-a2eb-479d-b22f-71280a7705ed",
+      "name": "Webhook",
+      "webhookId": "986024f9-531d-4576-8f54-88383019dcc7"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c86c69b2-9193-4668-b653-cbbafd14bcf2",
+              "leftValue": "={{ $json.Email }}",
+              "rightValue": "={{ $('Webhook').item.json.query.email }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "71687b77-6e5a-49ab-a09d-d52db2dd15c4",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "1uN2SE7olVQzim_0cWwnBORRNPJQwD-3w29_QPP-Kgl0",
+          "mode": "list",
+          "cachedResultName": "AI_Brain_Vault",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uN2SE7olVQzim_0cWwnBORRNPJQwD-3w29_QPP-Kgl0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 621051853,
+          "mode": "list",
+          "cachedResultName": "archive",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uN2SE7olVQzim_0cWwnBORRNPJQwD-3w29_QPP-Kgl0/edit#gid=621051853"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Email",
+              "lookupValue": "={{ $json.query.email }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        224,
+        0
+      ],
+      "id": "3730cf10-ff33-4e40-a8fb-86aca8ae033c",
+      "name": "Get Rows(AllRows)",
+      "credentials": {
+        "googleApi": {
+          "id": "lUBwBlOaD6WFHrtl",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{\nJSON.stringify({\n  \"status\": \"success\",\n  \"posts\": $(\"Filter\").all().map(item => item.json)\n})\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        608,
+        0
+      ],
+      "id": "d9c85685-6188-402b-b228-e1310ddadc69",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get Rows(AllRows)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Rows(AllRows)": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "09b24ab5-717d-4713-8672-36dc490f63a2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e9e6bb4306524d6ff8592717aefe8190dd63b1c808944db0a600f922ea24764b"
+  },
+  "id": "QiQRSjroy4paPWll",
+  "tags": []
+}
