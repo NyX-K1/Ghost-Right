@@ -5,12 +5,14 @@ dist/
 
 # Planning and Task files
 implementation_plan.md
-tasks.md
+task.md
+walkthrough
 recovery.json
 
 # Docker & Infrastructure (Keep if you use them, ignore if they are clutter)
-docker.yml
+docker-compose.yml
 
 # WSL/System noise
 .DS_Store
 Thumbs.db
+
