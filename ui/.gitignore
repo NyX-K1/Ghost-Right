@@ -2,3 +2,15 @@
 node_modules/
 dist/
 .DS_Store
+
+# Planning and Task files
+implementation_plan.md
+tasks.md
+recovery.json
+
+# Docker & Infrastructure (Keep if you use them, ignore if they are clutter)
+docker.yml
+
+# WSL/System noise
+.DS_Store
+Thumbs.db
