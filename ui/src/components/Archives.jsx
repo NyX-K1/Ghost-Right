@@ -14,8 +14,8 @@ const Archives = ({ setActiveTab }) => {
             if (!userEmail) return;
 
             try {
-                const n8nBaseUrl = import.meta.env.VITE_N8N_BASE_URL; // e.g., http://localhost:5678/webhook
-                const url = `${n8nBaseUrl}/archives`;
+                // Production URL for the archive fetch workflow
+                const url = 'http://localhost:5678/webhook/archives';
 
                 // Ensure query parameter is correctly formatted
                 const response = await fetch(`${url}?email=${userEmail}`);

@@ -65,9 +65,8 @@ function App() {
     const handleGenerate = async (formData) => {
         setStatus('transcribing');
 
-        // Environment Variable for Base URL
-        const n8nBaseUrl = import.meta.env.VITE_N8N_BASE_URL; // e.g., http://localhost:5678/webhook
-        const endpoint = `${n8nBaseUrl}/ghostwriter-input`;
+        // Production URL for the main n8n workflow
+        const endpoint = 'http://localhost:5678/webhook/ghostwriter-input';
 
         try {
             setTimeout(() => setStatus('analyzing'), 2000);
