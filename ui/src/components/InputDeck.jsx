@@ -11,7 +11,7 @@ const InputDeck = ({ onSubmit, isLoading, userEmail }) => {
         url: '',
         samples: ''
     });
-    const [isNewUser, setIsNewUser] = useState(false);
+    const [isNewUser, setIsNewUser] = useState(true);
     const [errors, setErrors] = useState({});
 
     // Sync prop changes

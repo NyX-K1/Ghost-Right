@@ -3,11 +3,10 @@ import { motion } from 'framer-motion';
 import { Search, Loader2, Ghost } from 'lucide-react';
 import ArchiveCard from './ArchiveCard';
 
-const Archives = ({ setActiveTab }) => {
+const Archives = ({ setActiveTab, userEmail }) => {
     const [posts, setPosts] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
-    const userEmail = sessionStorage.getItem('userEmail');
 
     useEffect(() => {
         const fetchArchives = async () => {
